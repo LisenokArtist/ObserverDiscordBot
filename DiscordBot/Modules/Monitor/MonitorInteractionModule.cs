@@ -19,8 +19,8 @@ namespace DiscordBot.Modules.Monitor
         }
 
         #region Команды
-        [SlashCommand(name: "logmessages", description: "Отслеживает сообщения в канале.")]
-        public async Task LogMessages(IGuildChannel? include = null, IGuildChannel? exclude = null)
+        [SlashCommand(name: "monitor-channel", description: "Отслеживает сообщения в канале.")]
+        public async Task MonitorChannel(IGuildChannel? include = null, IGuildChannel? exclude = null)
         {
             IEnumerable<SocketGuildChannel> toInsert;
             IEnumerable<SocketGuildChannel> toUpdate;
@@ -49,8 +49,8 @@ namespace DiscordBot.Modules.Monitor
             }
         }
 
-        [SlashCommand(name: "logmessages-to", description: "Выводит информацию об изменениях сообщений в отслеживаемых каналах")]
-        public async Task LogTo(SocketTextChannel? channel)
+        [SlashCommand(name: "monitor-channel-responses", description: "Выводит информацию об изменениях сообщений в отслеживаемых каналах")]
+        public async Task MonitorChannelResponses(SocketTextChannel? channel)
         {
             _controller.ChangeChannelToLog(Context, channel,
                 out int countAdded, out int countUpdated, out int countRemoved);
