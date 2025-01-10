@@ -9,7 +9,7 @@ namespace DiscordBot.Modules.Pinterest
         public async Task Pin(string url)
         {
             var result = string.Empty;
-
+            var isEphemeral = false;
             try
             {
                 using (var client = new HttpClient())
@@ -18,13 +18,11 @@ namespace DiscordBot.Modules.Pinterest
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        var str = await response.Content.ReadAsStreamAsync();
                         var document = new HtmlDocument();
                         document.LoadHtml(content);
 
-                        var nodes = document.DocumentNode.SelectNodes("//div[@class='OVX lnZ mQ8 oy8 zI7 iyn Hsu']/descendant::div/img|//div[@class='OVX lnZ mQ8 oy8 zI7 iyn Hsu']/descendant::div/video");
-                        if (nodes.Count() > 1) throw new Exception("Incorrect xPath - many nodes found");
-
+                        var nodes = document.DocumentNode
+                            .SelectNodes("//video|//img");
                         var node = nodes.First();
                         var imgSrc = node.Attributes["src"].Value;
                         result = node.Name switch
@@ -38,11 +36,12 @@ namespace DiscordBot.Modules.Pinterest
             }
             catch (Exception ex)
             {
+                isEphemeral = true;
                 result = ex.Message;
             }
             finally
             {
-                await RespondAsync(result);
+                await RespondAsync(result, ephemeral: isEphemeral);
             }
         }
     }

@@ -36,7 +36,7 @@ namespace DiscordBot
         {
             MessageCacheSize = 100,
             AlwaysDownloadUsers = true,
-            
+            HandlerTimeout = 10000,
             LogLevel = LogSeverity.Info,
             GatewayIntents =    GatewayIntents.All,
         };
