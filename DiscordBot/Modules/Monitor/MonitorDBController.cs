@@ -1,6 +1,6 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
-using DiscordBot.Entities.MessageLogger;
+using DiscordBot.Entities.Monitor;
 using DiscordBot.Structures;
 using SQLite;
 
