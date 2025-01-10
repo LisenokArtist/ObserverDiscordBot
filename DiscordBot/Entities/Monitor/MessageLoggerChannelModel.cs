@@ -1,7 +1,7 @@
 ﻿using DiscordBot.Entities.Base;
 using SQLite;
 
-namespace DiscordBot.Entities.MessageLogger
+namespace DiscordBot.Entities.Monitor
 {
     [Table("MessageLoggerLoggedChannels")]
     public class MessageLoggerChannelModel : ChannelBase
