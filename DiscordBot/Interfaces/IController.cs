@@ -7,7 +7,5 @@
         public int Update(T body);
 
         public int Remove(T body);
-
-        public T? Get(int id);
     }
 }

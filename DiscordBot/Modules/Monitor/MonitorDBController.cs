@@ -39,18 +39,6 @@ namespace DiscordBot.Modules.Monitor
 
         #region Методы проверки
         /// <summary>
-        /// Возвращает элемент по идентификатору
-        /// </summary>
-        /// <param name="id">Идентификатор элемента</param>
-        /// <returns>Канал</returns>
-        public override MessageLoggerChannelModel? Get(int id)
-        {
-            return _connection
-                .Table<MessageLoggerChannelModel>()
-                .SingleOrDefault(x => x.ID == id);
-        }
-
-        /// <summary>
         /// Возвращает элемент по идентификатору канала
         /// </summary>
         /// <param name="channelId">Идентификатор канала</param>

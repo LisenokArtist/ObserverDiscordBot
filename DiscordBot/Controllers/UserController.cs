@@ -8,16 +8,6 @@ namespace DiscordBot.Controllers
     {
         public UserController(SQLiteConnection connection) : base(connection) { }
 
-        public override UserModel? Get(int id)
-        {
-            return _connection
-                .Table<UserModel>()
-                .SingleOrDefault(x =>
-                {
-                    return x.ID == id;
-                });
-        }
-
         public UserModel? Get(string id)
         {
             return _connection

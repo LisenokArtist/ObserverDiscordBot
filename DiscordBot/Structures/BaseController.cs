@@ -70,8 +70,6 @@ namespace DiscordBot.Structures
             return count;
         }
 
-        public abstract T1? Get(int id);
-
         internal string GetTableNameT1()
         {
             return GetTableName<T1>();

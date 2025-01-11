@@ -10,16 +10,6 @@ namespace DiscordBot.Controllers
         {
         }
 
-        public override ActivityModel? Get(int id)
-        {
-            return _connection
-                .Table<ActivityModel>()
-                .SingleOrDefault(x =>
-                {
-                    return x.ID == id;
-                });
-        }
-
         public ActivityModel? Get(int id, DateTime sessionDate)
         {
             return _connection
