@@ -9,6 +9,7 @@ using Discord.Interactions;
 using Microsoft.Extensions.DependencyInjection;
 using DiscordBot.Services;
 using DiscordBot.Modules.Monitor;
+using DiscordBot.Entities.Pinterest;
 
 namespace DiscordBot
 {
@@ -57,8 +58,8 @@ namespace DiscordBot
                 .AddSingleton<DiscordSocketClient>(x => new DiscordSocketClient(_config))
                 .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<MonitorInteractionModule>()
                 .AddSingleton<MonitorModule>()
+                .AddSingleton<PinterestModule>()
                 .BuildServiceProvider();
         }
 
@@ -96,7 +97,10 @@ namespace DiscordBot
             await Client.LoginAsync(TokenType.Bot, token);
             await Client.StartAsync();
             await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
-            await _services.GetRequiredService<MonitorModule>().InitializeAsync();
+            var monitor = _services.GetRequiredService<MonitorModule>();
+            await monitor.InitializeAsync();
+            var pinterest = _services.GetRequiredService<PinterestModule>();
+            await pinterest.InitializeAsync();
         }
         #endregion
 
