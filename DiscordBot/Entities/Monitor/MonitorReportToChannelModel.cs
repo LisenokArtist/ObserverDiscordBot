@@ -3,8 +3,8 @@ using SQLite;
 
 namespace DiscordBot.Entities.Monitor
 {
-    [Table("MessageLoggerLoggedToChannel")]
-    public class MessageLoggerLoggedToChannelModel : ChannelBase
+    [Table("MonitorReportToChannel")]
+    public class MonitorReportToChannelModel : ChannelBase
     {
         public string GuildId { get; set; }
     }

@@ -25,7 +25,7 @@ namespace DiscordBot.Modules.Monitor
     }
 
     public class MonitorDBController 
-        : BaseController<MessageLoggerChannelModel, MessageLoggerLoggedToChannelModel>
+        : BaseController<MonitorChannelModel, MonitorReportToChannelModel>
     {
         #region События
         public event EventHandler OnTableChanged;
@@ -43,9 +43,9 @@ namespace DiscordBot.Modules.Monitor
         /// </summary>
         /// <param name="channelId">Идентификатор канала</param>
         /// <returns>Канал</returns>
-        public MessageLoggerChannelModel? GetChannelById(ulong channelId)
+        public MonitorChannelModel? GetChannelById(ulong channelId)
         {
-            return _connection.Table<MessageLoggerChannelModel>().SingleOrDefault(x => x.ChannelId == channelId.ToString());
+            return _connection.Table<MonitorChannelModel>().SingleOrDefault(x => x.ChannelId == channelId.ToString());
         }
 
         /// <summary>
@@ -53,14 +53,14 @@ namespace DiscordBot.Modules.Monitor
         /// </summary>
         /// <param name="channelIds">Идентификатор каналов</param>
         /// <returns>Список каналов</returns>
-        public IEnumerable<MessageLoggerChannelModel> GetChannelsByIds(IEnumerable<ulong> channelIds)
+        public IEnumerable<MonitorChannelModel> GetChannelsByIds(IEnumerable<ulong> channelIds)
         {
-            var query = $"select * from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MessageLoggerChannelModel.ChannelId)}\" in ({String.Join(',', channelIds.Select(x => x.ToString()))})";
-            var result = _connection.Query<MessageLoggerChannelModel>(query).AsEnumerable();
+            var query = $"select * from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MonitorChannelModel.ChannelId)}\" in ({String.Join(',', channelIds.Select(x => x.ToString()))})";
+            var result = _connection.Query<MonitorChannelModel>(query).AsEnumerable();
             if (result.Count() > 0)
                 return result;
 
-            return Enumerable.Empty<MessageLoggerChannelModel>();
+            return Enumerable.Empty<MonitorChannelModel>();
         }
         
         /// <summary>
@@ -68,13 +68,13 @@ namespace DiscordBot.Modules.Monitor
         /// </summary>
         /// <param name="guildId">Идентификатор сервера</param>
         /// <returns>Список каналов</returns>
-        public IEnumerable<MessageLoggerChannelModel> GetChannelsByGuildId(ulong guildId)
+        public IEnumerable<MonitorChannelModel> GetChannelsByGuildId(ulong guildId)
         {
-            var query = $"select * from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MessageLoggerChannelModel.GuildId)}\" == {guildId}";
-            var result = _connection.Query<MessageLoggerChannelModel>(query).AsEnumerable();
+            var query = $"select * from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MonitorChannelModel.GuildId)}\" == {guildId}";
+            var result = _connection.Query<MonitorChannelModel>(query).AsEnumerable();
             if (result.Count() > 0)
                 return result;
-            return Enumerable.Empty<MessageLoggerChannelModel>();
+            return Enumerable.Empty<MonitorChannelModel>();
         }
         #endregion
 
@@ -92,7 +92,7 @@ namespace DiscordBot.Modules.Monitor
             if (channelsToAdd.Count() == 0) return 0;
 
             var channels = from c in channelsToAdd
-                           select new MessageLoggerChannelModel
+                           select new MonitorChannelModel
                            {
                                GuildId = c.GuildId.ToString(),
                                ChannelId = c.ChannelId.ToString(),
@@ -159,7 +159,7 @@ namespace DiscordBot.Modules.Monitor
         {
             if (channelIds.Count() == 0) return 0;
 
-            var query = $"delete from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MessageLoggerChannelModel.ChannelId)}\" in ({String.Join(',', channelIds)})";
+            var query = $"delete from \"{GetLoggedChannelsTableName()}\" where \"{nameof(MonitorChannelModel.ChannelId)}\" in ({String.Join(',', channelIds)})";
             var countChanges = _connection.Execute(query);
 
             TryFireOnTableChanged(fireEvent, countChanges);
@@ -193,7 +193,7 @@ namespace DiscordBot.Modules.Monitor
         #region MessageLoggerLoggedToChannelModel
         private int RemoveLoggedToChannelByGuildId(ulong guildId, bool fireEvent = true)
         {
-            var query = $"delete from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MessageLoggerLoggedToChannelModel.GuildId)}\" == {guildId}";
+            var query = $"delete from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MonitorReportToChannelModel.GuildId)}\" == {guildId}";
             var countChanges = _connection.Execute(query);
 
             TryFireOnTableChanged(fireEvent, countChanges);
@@ -225,7 +225,7 @@ namespace DiscordBot.Modules.Monitor
                 }
                 else
                 {
-                    var newInstance = new MessageLoggerLoggedToChannelModel()
+                    var newInstance = new MonitorReportToChannelModel()
                     {
                         GuildId = channel.Guild.Id.ToString(),
                         ChannelId = channel.Id.ToString(),
@@ -258,10 +258,10 @@ namespace DiscordBot.Modules.Monitor
         /// </summary>
         /// <param name="guildId">Идентификатор сервера</param>
         /// <returns>Канал</returns>
-        public MessageLoggerLoggedToChannelModel? GetLoggedToChannel(ulong guildId)
+        public MonitorReportToChannelModel? GetLoggedToChannel(ulong guildId)
         {
-            var query = $"select * from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MessageLoggerLoggedToChannelModel.GuildId)}\" == {guildId}";
-            var result = _connection.Query<MessageLoggerLoggedToChannelModel>(query).FirstOrDefault();
+            var query = $"select * from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MonitorReportToChannelModel.GuildId)}\" == {guildId}";
+            var result = _connection.Query<MonitorReportToChannelModel>(query).FirstOrDefault();
             return result;
         }
 
