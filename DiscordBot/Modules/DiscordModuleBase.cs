@@ -16,8 +16,9 @@ namespace DiscordBot.Modules
         {
             _client = client;
             _services = services;
-
-            if (_services.GetRequiredService<T>() == null) throw new Exception($"Для работы модуля требуется добавить {nameof(T)} в коллекцию сервисов");
+            //var service = _services.GetRequiredService<T>();
+            //if (service == null) 
+            //    throw new Exception($"Для работы модуля требуется добавить {nameof(T)} в коллекцию сервисов");
         }
     }
 }
