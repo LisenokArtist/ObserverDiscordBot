@@ -32,8 +32,15 @@ namespace DiscordBot.Modules.Monitor
 
         private async Task MessageDeleted(Discord.Cacheable<Discord.IMessage, ulong> cachedMessage, Discord.Cacheable<Discord.IMessageChannel, ulong> channel)
         {
+            //Игнорировать сообщения от ботов
+            if (cachedMessage.HasValue && cachedMessage.Value.Author.IsBot)
+                return;
+
             if (channel.HasValue)
+            {
                 await TryRespondMessage(cachedMessage, channel.Value);
+            }
+                
             //Console.WriteLine($"{title}: {content}");
             return;
         }
@@ -45,6 +52,14 @@ namespace DiscordBot.Modules.Monitor
 
         private async Task MessageUpdated(Discord.Cacheable<Discord.IMessage, ulong> cachedMessage, SocketMessage message, ISocketMessageChannel channel)
         {
+            //Игнорировать сообщения от ботов
+            if (message.Author.IsBot)
+                return;
+
+            //Игнорировать если сообщение из кеша осталось без изменений
+            if (cachedMessage.HasValue && cachedMessage.Value.Content.Equals(message.Content))
+                return;
+
             await TryRespondMessage(cachedMessage, channel, message);
             //Console.WriteLine($"{title}: {content}");
             return;
