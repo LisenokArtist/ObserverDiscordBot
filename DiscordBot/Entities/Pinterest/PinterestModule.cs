@@ -1,22 +1,15 @@
 ﻿using Discord.WebSocket;
 using DiscordBot.Modules;
 using DiscordBot.Modules.Pinterest;
-using Microsoft.Extensions.DependencyInjection;
-using SQLite;
 using System.Text.RegularExpressions;
 
 namespace DiscordBot.Entities.Pinterest
 {
-    public class PinterestModule : DiscordModuleBase<PinterestInteractionModule>
+    public class PinterestModule : DiscordModuleBase
     {
-        private readonly PinterestDBController _controller;
+        internal PinterestDBController Controller { get { return (PinterestDBController)_controller; } }
 
-        public PinterestModule(DiscordSocketClient client, IServiceProvider services) : base(client, services)
-        {
-            _controller = new PinterestDBController(services.GetRequiredService<SQLiteConnection>());
-        }
-
-        internal async Task InitializeAsync()
+        public PinterestModule(DiscordSocketClient client, PinterestDBController controller) : base(client, controller)
         {
             _client.MessageReceived += MessageReceived;
         }
@@ -26,7 +19,7 @@ namespace DiscordBot.Entities.Pinterest
             var channel = message.Channel as SocketGuildChannel;
             if (channel == null) return;
 
-            var settings = _controller.GetSettings(channel.Guild.Id);
+            var settings = Controller.GetSettings(channel.Guild.Id);
             if (settings == null) return;
 
             if (settings.AllowAutoModifyMessages)
@@ -45,7 +38,8 @@ namespace DiscordBot.Entities.Pinterest
             }
         }
 
-        public async Task<IEnumerable<string>> ModifyPinterestLinks(IEnumerable<string> urls)
+        #region Static
+        public static async Task<IEnumerable<string>> ModifyPinterestLinks(IEnumerable<string> urls)
         {
             var result = new List<string>();
             foreach (var url in urls)
@@ -57,7 +51,7 @@ namespace DiscordBot.Entities.Pinterest
             return result.AsEnumerable();
         }
 
-        public IEnumerable<string> ExtractPinterestLinks(string text)
+        public static IEnumerable<string> ExtractPinterestLinks(string text)
         {
             string[] whiteList = [
                 "pinterest.com",
@@ -136,16 +130,6 @@ namespace DiscordBot.Entities.Pinterest
                          select m.Value;
             return result;
         }
+        #endregion
     }
 }
-/*
- 
-     var results = new ConcurrentQueue<T>();
-    var tasks = source.Select(
-        async x =>
-        {
-            if (await predicate(x))
-                results.Enqueue(x);
-        });
-    await Task.WhenAll(tasks);
-    return results;*/

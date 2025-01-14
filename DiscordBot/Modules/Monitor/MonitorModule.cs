@@ -1,22 +1,13 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using SQLite;
 
 namespace DiscordBot.Modules.Monitor
 {
-    public class MonitorModule : DiscordModuleBase<MonitorInteractionModule>
+    public class MonitorModule : DiscordModuleBase
     {
-        private MonitorDBController _controller;
-        
-        public MonitorModule(DiscordSocketClient client, IServiceProvider services) : base(client, services)
-        {
-            _controller = new MonitorDBController(services.GetRequiredService<SQLiteConnection>());
+        internal MonitorDBController Controller { get { return (MonitorDBController)_controller; } }
 
-            //services.GetRequiredService<CommandHandlingService>()._sqlite.TableChanged += TableChanged;
-        }
-
-        internal async Task InitializeAsync()
+        public MonitorModule(DiscordSocketClient client, MonitorDBController controller) : base(client, controller)
         {
             _client.MessageDeleted += MessageDeleted;
             _client.MessagesBulkDeleted += MessagesBulkDeleted;
@@ -75,7 +66,7 @@ namespace DiscordBot.Modules.Monitor
             if (guild == null) return false;
 
             //Проверим, можем ли отправить ответ в канал для ответов
-            var channelToResponse = _controller.GetLoggedToChannel(guild.Id);
+            var channelToResponse = Controller.GetLoggedToChannel(guild.Id);
             if (channelToResponse == null) return false;
 
             //Получим из гилды нужную сущность канала

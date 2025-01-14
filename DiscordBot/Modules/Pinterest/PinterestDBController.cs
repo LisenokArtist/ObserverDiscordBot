@@ -4,10 +4,8 @@ using SQLite;
 
 namespace DiscordBot.Modules.Pinterest
 {
-    public class PinterestDBController : BaseController<PinterestSettingsModel>
+    public class PinterestDBController(SQLiteConnection connection) : BaseController<PinterestSettingsModel>(connection)
     {
-        public PinterestDBController(SQLiteConnection connection) : base(connection) { }
-
         public PinterestSettingsModel? GetSettings(ulong guildId)
         {
             return _connection

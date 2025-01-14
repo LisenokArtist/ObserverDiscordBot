@@ -1,6 +1,6 @@
 ﻿namespace DiscordBot.Interfaces
 {
-    public interface IController
+    public interface IDiscordModule
     {
 
     }

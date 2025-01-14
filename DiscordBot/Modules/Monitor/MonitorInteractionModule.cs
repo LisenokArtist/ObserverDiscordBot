@@ -1,24 +1,48 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
 using Discord;
-using DiscordBot.Models;
-using Newtonsoft.Json;
 using DiscordBot.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Discord.Interactions.Builders;
+using DiscordBot.Entities.Pinterest;
+using DiscordBot.Modules.Pinterest;
+using DiscordBot.Interfaces;
+using DiscordBot.Structures;
 
 namespace DiscordBot.Modules.Monitor
 {
     public class MonitorInteractionModule : InteractionModuleBase<SocketInteractionContext>
     {
-        private CommandHandlingService _handler;
         private readonly MonitorDBController _controller;
 
         public MonitorInteractionModule(CommandHandlingService handler)
         {
-            _handler = handler;
-            _controller = new MonitorDBController(_handler._sqlite);
+            var service = handler
+                ._services
+                .GetRequiredService<InteractionServiceExtended>();
+
+            _controller = (MonitorDBController)service
+                .DiscordModules
+                .SingleOrDefault(x => { return x.Value is MonitorDBController; }).Value;
+
+            if (_controller == null)
+            {
+                var pair = CreateModules(service);
+                service.AddDiscordModule(pair);
+                _controller = (MonitorDBController)pair.Value;
+            }
+        }
+
+        private static KeyValuePair<IDiscordModule, IController> CreateModules(InteractionServiceExtended serviceExtended)
+        {
+            var controller = new MonitorDBController(serviceExtended.SQLite);
+            var module = new MonitorModule(serviceExtended.Client, controller);
+            return new KeyValuePair<IDiscordModule, IController>(module, controller);
         }
 
         #region Команды
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
+        [RequireBotPermission(GuildPermission.ReadMessageHistory | GuildPermission.ViewChannel)]
         [SlashCommand(name: "monitor-channel", description: "Отслеживает сообщения в канале.")]
         public async Task MonitorChannel(IGuildChannel? include = null, IGuildChannel? exclude = null)
         {
@@ -49,6 +73,8 @@ namespace DiscordBot.Modules.Monitor
             }
         }
 
+        [DefaultMemberPermissions(GuildPermission.Administrator)]
+        [RequireBotPermission(GuildPermission.ViewChannel | GuildPermission.SendMessages)]
         [SlashCommand(name: "monitor-channel-responses", description: "Выводит информацию об изменениях сообщений в отслеживаемых каналах")]
         public async Task MonitorChannelResponses(SocketTextChannel? channel)
         {

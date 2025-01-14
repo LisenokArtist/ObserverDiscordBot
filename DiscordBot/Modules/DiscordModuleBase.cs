@@ -1,24 +1,18 @@
-﻿using Discord.Interactions;
-using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Discord.WebSocket;
+using DiscordBot.Interfaces;
+using DiscordBot.Structures;
 
 namespace DiscordBot.Modules
 {
-    /// <summary>
-    /// Базовый модуль дискорда. Описывает действия и набор команд
-    /// </summary>
-    public abstract class DiscordModuleBase<T> where T : IInteractionModuleBase
+    public class DiscordModuleBase : IDiscordModule
     {
         internal readonly DiscordSocketClient _client;
-        private readonly IServiceProvider _services;
+        internal readonly BaseController _controller;
 
-        internal DiscordModuleBase(DiscordSocketClient client, IServiceProvider services)
+        internal DiscordModuleBase(DiscordSocketClient client, BaseController controller)
         {
             _client = client;
-            _services = services;
-            //var service = _services.GetRequiredService<T>();
-            //if (service == null) 
-            //    throw new Exception($"Для работы модуля требуется добавить {nameof(T)} в коллекцию сервисов");
+            _controller = controller;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using DiscordBot.Entities;
-using DiscordBot.Interfaces;
+﻿using DiscordBot.Interfaces;
 using SQLite;
 using System.Reflection;
 
@@ -20,25 +19,23 @@ namespace DiscordBot.Structures
         }
     }
 
-    public abstract class BaseController<T1> : IController<T1> where T1 : IDataEntity
+    public abstract class BaseController<T1> : BaseController
+        where T1 : IDataEntity
     {
-        internal SQLiteConnection _connection { get; set; }
-
-        internal BaseController(SQLiteConnection connection)
+        internal BaseController(SQLiteConnection connection) : base(connection)
         {
-            _connection = connection;
             _connection.CreateTable<T1>();
         }
 
-        public int Add(T1 body) => _connection.Insert(body);
+        public int Add(object body) => _connection.Insert((T1)body);
 
-        public int Update(T1 body)
+        public int Update(object body)
         {
-            body.UpdatedDate = DateTime.Now;
-            return _connection.Update(body);
+            ((T1)body).UpdatedDate = DateTime.Now;
+            return _connection.Update((T1)body);
         }
 
-        public int Remove(T1 body) => _connection.Delete(body);
+        public int Remove(object body) => _connection.Delete((T1)body);
 
         /// <summary>
         /// Удаляет из базы указанные объекты
@@ -82,6 +79,16 @@ namespace DiscordBot.Structures
             if (inNull) throw new ArgumentException($"Не удалось извлечь аттрибут {nameof(TableAttribute)}");
 
             return ((TableAttribute)attribute).Name;
+        }
+    }
+
+    public class BaseController : IController
+    {
+        internal SQLiteConnection _connection { get; set; }
+
+        internal BaseController(SQLiteConnection connection)
+        {
+            _connection = connection;
         }
     }
 }

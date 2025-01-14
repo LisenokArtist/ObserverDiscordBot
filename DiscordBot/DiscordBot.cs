@@ -55,32 +55,25 @@ namespace DiscordBot
         {
             return new ServiceCollection()
                 .AddSingleton(x => new SQLiteConnection(new SQLiteConnectionString(Path.Combine(Environment.CurrentDirectory, "NewDataBase.db"))))
-                .AddSingleton<DiscordSocketClient>(x => new DiscordSocketClient(_config))
-                .AddSingleton(x => new InteractionService(x.GetRequiredService<DiscordSocketClient>()))
+                .AddSingleton(x => new DiscordSocketClient(_config))
+                .AddSingleton(x => new InteractionServiceExtended(
+                    x.GetRequiredService<DiscordSocketClient>(), 
+                    x.GetRequiredService<SQLiteConnection>()))
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<MonitorModule>()
-                .AddSingleton<PinterestModule>()
                 .BuildServiceProvider();
         }
 
         private void InitializeDataBase()
         {
             Connection = new SQLiteConnection(new SQLiteConnectionString(Path.Combine(Environment.CurrentDirectory, "DataBase.db")));
-        
-            UserController = new UserController(Connection);
-            ActivityController = new ActivityController(Connection);
         }
-
-
-        public InteractionService InteractionService { get; private set; }
 
         private ServiceProvider _services;
         private async Task InitializeAsync()
         {
             _services = ConfigureServices();
-
             Client = _services.GetRequiredService<DiscordSocketClient>();
-            Commands = _services.GetRequiredService<InteractionService>();
+            Commands = _services.GetRequiredService<InteractionServiceExtended>();
 
             Client.Log += Client_Log;
             Commands.Log += Client_Log;
@@ -97,10 +90,10 @@ namespace DiscordBot
             await Client.LoginAsync(TokenType.Bot, token);
             await Client.StartAsync();
             await _services.GetRequiredService<CommandHandlingService>().InitializeAsync();
-            var monitor = _services.GetRequiredService<MonitorModule>();
-            await monitor.InitializeAsync();
-            var pinterest = _services.GetRequiredService<PinterestModule>();
-            await pinterest.InitializeAsync();
+            //var monitor = _services.GetRequiredService<MonitorModule>();
+            //await monitor.InitializeAsync();
+            //var pinterest = _services.GetRequiredService<PinterestModule>();
+            //await pinterest.InitializeAsync();
         }
         #endregion
 

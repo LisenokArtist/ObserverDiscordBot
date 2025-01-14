@@ -8,11 +8,15 @@ namespace DiscordBot.Services
     public class CommandHandlingService
     {
         internal readonly DiscordSocketClient _client;
-        private readonly InteractionService _commands;
-        private readonly IServiceProvider _services;
+        internal readonly InteractionServiceExtended _commands;
+        internal readonly IServiceProvider _services;
         internal readonly SQLiteConnection _sqlite;
 
-        public CommandHandlingService(SQLiteConnection sqlite, DiscordSocketClient client, InteractionService commands, IServiceProvider services)
+        public CommandHandlingService(
+            SQLiteConnection sqlite, 
+            DiscordSocketClient client,
+            InteractionServiceExtended commands, 
+            IServiceProvider services)
         {
             _sqlite = sqlite;
             _client = client;
