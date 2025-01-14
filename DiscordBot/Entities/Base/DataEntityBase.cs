@@ -1,6 +1,6 @@
 ﻿using DiscordBot.Interfaces;
 
-namespace DiscordBot.Structures
+namespace DiscordBot.Entities.Base
 {
     public class DataEntityBase : IDataEntity
     {

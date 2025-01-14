@@ -1,8 +1,8 @@
 ﻿using Discord;
 using Discord.Interactions;
-using DiscordBot.Entities.Pinterest;
+using DiscordBot.Core;
+using DiscordBot.Core.DiscordNetExtensions;
 using DiscordBot.Interfaces;
-using DiscordBot.Services;
 using HtmlAgilityPack;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,13 +28,6 @@ namespace DiscordBot.Modules.Pinterest
                 service.AddDiscordModule(pair);
                 _controller = (PinterestDBController)pair.Value;
             }
-        }
-
-        private static KeyValuePair<IDiscordModule, IController> CreateModules(InteractionServiceExtended serviceExtended)
-        {
-            var controller = new PinterestDBController(serviceExtended.SQLite);
-            var module = new PinterestModule(serviceExtended.Client, controller);
-            return new KeyValuePair<IDiscordModule, IController>(module, controller);
         }
 
         #region Команды
@@ -87,6 +80,19 @@ namespace DiscordBot.Modules.Pinterest
         #endregion
 
         #region Статичные
+        private static KeyValuePair<IDiscordModule, IController> CreateModules(InteractionServiceExtended serviceExtended)
+        {
+            var controller = new PinterestDBController(serviceExtended.SQLite);
+            var module = new PinterestModule(serviceExtended.Client, controller);
+            return new KeyValuePair<IDiscordModule, IController>(module, controller);
+        }
+
+        /// <summary>
+        /// Извлекает из ссылки на пинтерест и возвращает прямую ссылку на контент, который нормально воспринимается дискордом
+        /// </summary>
+        /// <param name="url">Ссылка на пинтерест</param>
+        /// <returns>Прямая ссылка на контент</returns>
+        /// <exception cref="NotImplementedException"></exception>
         public static async Task<string> GetContentFromPin(string url)
         {
             var result = string.Empty;

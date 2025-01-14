@@ -1,13 +1,10 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
 using Discord;
-using DiscordBot.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Discord.Interactions.Builders;
-using DiscordBot.Entities.Pinterest;
-using DiscordBot.Modules.Pinterest;
 using DiscordBot.Interfaces;
-using DiscordBot.Structures;
+using DiscordBot.Core;
+using DiscordBot.Core.DiscordNetExtensions;
 
 namespace DiscordBot.Modules.Monitor
 {
@@ -31,13 +28,6 @@ namespace DiscordBot.Modules.Monitor
                 service.AddDiscordModule(pair);
                 _controller = (MonitorDBController)pair.Value;
             }
-        }
-
-        private static KeyValuePair<IDiscordModule, IController> CreateModules(InteractionServiceExtended serviceExtended)
-        {
-            var controller = new MonitorDBController(serviceExtended.SQLite);
-            var module = new MonitorModule(serviceExtended.Client, controller);
-            return new KeyValuePair<IDiscordModule, IController>(module, controller);
         }
 
         #region Команды
@@ -92,7 +82,7 @@ namespace DiscordBot.Modules.Monitor
         }
         #endregion
 
-        #region Приватные методы
+        #region Приватные
         /// <summary>
         /// Получает конструктор сообщения со списком отслеживаемых каналов
         /// </summary>
@@ -109,28 +99,6 @@ namespace DiscordBot.Modules.Monitor
                 .WithDescription(string.Join(",\n", mentions))
                 .WithColor(Color.Green)
                 .WithCurrentTimestamp();
-        }
-
-        /// <summary>
-        /// Извлекает из унаследованных от IGuildChannel список каналов
-        /// </summary>
-        /// <param name="guildChannel"></param>
-        /// <returns></returns>
-        private IEnumerable<SocketGuildChannel> GetSocketGuildChannels(IGuildChannel? guildChannel)
-        {
-            if (guildChannel != null)
-            {
-                switch (guildChannel)
-                {
-                    case SocketTextChannel socketTextChannel:
-                        return new List<SocketGuildChannel>() { socketTextChannel };
-                    case SocketCategoryChannel socketCategoryChannel:
-                        return socketCategoryChannel.Channels;
-                    default: throw new NotImplementedException("Не удалось обработать интерфейс IGuildChannel");
-                }
-            }
-
-            return Enumerable.Empty<SocketGuildChannel>();
         }
 
         /// <summary>
@@ -170,9 +138,40 @@ namespace DiscordBot.Modules.Monitor
             mergedCollection = mergedCollection.Except(toUpdate_).ToList();
             var toAdd_ = mergedCollection;
 
-            toRemove    = toRemove_.Select(x => x.Value);
-            toUpdate    = toUpdate_.Select(x => x.Value);
-            toAdd       = toAdd_.Select(x => x.Value);
+            toRemove = toRemove_.Select(x => x.Value);
+            toUpdate = toUpdate_.Select(x => x.Value);
+            toAdd = toAdd_.Select(x => x.Value);
+        }
+        #endregion
+
+        #region Статичные
+        private static KeyValuePair<IDiscordModule, IController> CreateModules(InteractionServiceExtended serviceExtended)
+        {
+            var controller = new MonitorDBController(serviceExtended.SQLite);
+            var module = new MonitorModule(serviceExtended.Client, controller);
+            return new KeyValuePair<IDiscordModule, IController>(module, controller);
+        }
+
+        /// <summary>
+        /// Извлекает из унаследованных от IGuildChannel список каналов
+        /// </summary>
+        /// <param name="guildChannel"></param>
+        /// <returns></returns>
+        public static IEnumerable<SocketGuildChannel> GetSocketGuildChannels(IGuildChannel? guildChannel)
+        {
+            if (guildChannel != null)
+            {
+                switch (guildChannel)
+                {
+                    case SocketTextChannel socketTextChannel:
+                        return new List<SocketGuildChannel>() { socketTextChannel };
+                    case SocketCategoryChannel socketCategoryChannel:
+                        return socketCategoryChannel.Channels;
+                    default: throw new NotImplementedException("Не удалось обработать интерфейс IGuildChannel");
+                }
+            }
+
+            return Enumerable.Empty<SocketGuildChannel>();
         }
         #endregion
     }

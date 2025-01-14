@@ -1,6 +1,4 @@
-﻿using DiscordBot.Structures;
-
-namespace DiscordBot.Entities.Base
+﻿namespace DiscordBot.Entities.Base
 {
     public class GuildBase : DataEntityBase
     {

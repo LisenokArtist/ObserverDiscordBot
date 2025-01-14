@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace DiscordBot.Core
+﻿namespace DiscordBot.Core
 {
     public class BotCommandExecuteException : Exception
     {

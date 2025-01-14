@@ -1,7 +1,6 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
 using DiscordBot.Entities.Monitor;
-using DiscordBot.Structures;
 using SQLite;
 
 namespace DiscordBot.Modules.Monitor
@@ -24,18 +23,12 @@ namespace DiscordBot.Modules.Monitor
         }
     }
 
-    public class MonitorDBController 
-        : BaseController<MonitorChannelModel, MonitorReportToChannelModel>
+    public class MonitorDBController(SQLiteConnection connection)
+                : BaseController<MonitorChannelModel, MonitorReportToChannelModel>(connection)
     {
         #region События
         public event EventHandler OnTableChanged;
         #endregion
-
-        public MonitorDBController(SQLiteConnection connection) : base(connection)
-        {
-
-        }
-
 
         #region Методы проверки
         /// <summary>
@@ -191,16 +184,6 @@ namespace DiscordBot.Modules.Monitor
         #endregion
 
         #region MessageLoggerLoggedToChannelModel
-        private int RemoveLoggedToChannelByGuildId(ulong guildId, bool fireEvent = true)
-        {
-            var query = $"delete from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MonitorReportToChannelModel.GuildId)}\" == {guildId}";
-            var countChanges = _connection.Execute(query);
-
-            TryFireOnTableChanged(fireEvent, countChanges);
-
-            return countChanges;
-        }
-
         public void ChangeChannelToLog(SocketInteractionContext context, SocketTextChannel? channel,
             out int countAdded, out int countUpdated, out int countRemoved)
         {
@@ -237,21 +220,6 @@ namespace DiscordBot.Modules.Monitor
 
             TryFireOnTableChanged(true, countAdded + countUpdated + countRemoved);
         }
-        #endregion
-        
-        #endregion
-
-        #region Закрытые методы
-        /// <summary>
-        /// Вызывает событие OnTableChanged если условия входящих параметров выполняются
-        /// </summary>
-        /// <param name="isFireEventAllowed">Разрешение на вызов событие</param>
-        /// <param name="countedChanges">Кол-во изменений в таблице</param>
-        private void TryFireOnTableChanged(bool isFireEventAllowed, int countedChanges)
-        {
-            if (isFireEventAllowed && countedChanges > 0)
-                OnTableChanged?.Invoke(this, EventArgs.Empty);
-        }
 
         /// <summary>
         /// Возвращает канал, куда будут отправляться сообщения с логами
@@ -264,16 +232,34 @@ namespace DiscordBot.Modules.Monitor
             var result = _connection.Query<MonitorReportToChannelModel>(query).FirstOrDefault();
             return result;
         }
+        #endregion
+        #endregion
 
-        private string GetLoggedChannelsTableName()
+        #region Приватные
+        private int RemoveLoggedToChannelByGuildId(ulong guildId, bool fireEvent = true)
         {
-            return GetTableNameT1();
+            var query = $"delete from \"{GetLoggedToChannelTableName()}\" where \"{nameof(MonitorReportToChannelModel.GuildId)}\" == {guildId}";
+            var countChanges = _connection.Execute(query);
+
+            TryFireOnTableChanged(fireEvent, countChanges);
+
+            return countChanges;
         }
 
-        private string GetLoggedToChannelTableName()
+        /// <summary>
+        /// Вызывает событие OnTableChanged если условия входящих параметров выполняются
+        /// </summary>
+        /// <param name="isFireEventAllowed">Разрешение на вызов событие</param>
+        /// <param name="countedChanges">Кол-во изменений в таблице</param>
+        private void TryFireOnTableChanged(bool isFireEventAllowed, int countedChanges)
         {
-            return GetTableNameT2();
+            if (isFireEventAllowed && countedChanges > 0)
+                OnTableChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        private string GetLoggedChannelsTableName() => GetTableNameT1();
+
+        private string GetLoggedToChannelTableName() => GetTableNameT2();
         #endregion
     }
 }

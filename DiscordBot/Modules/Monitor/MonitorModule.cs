@@ -3,6 +3,9 @@ using Discord.WebSocket;
 
 namespace DiscordBot.Modules.Monitor
 {
+    /// <summary>
+    /// Модуль для автономной работы по отслеживанию изменений и удаление сообщений на сервере
+    /// </summary>
     public class MonitorModule : DiscordModuleBase
     {
         internal MonitorDBController Controller { get { return (MonitorDBController)_controller; } }
@@ -12,13 +15,6 @@ namespace DiscordBot.Modules.Monitor
             _client.MessageDeleted += MessageDeleted;
             _client.MessagesBulkDeleted += MessagesBulkDeleted;
             _client.MessageUpdated += MessageUpdated;
-            _client.MessageReceived += MessageReceived;
-        }
-
-        private Task MessageReceived(SocketMessage arg)
-        {
-            Console.WriteLine($"{arg.Author.GlobalName}: {arg.Content}");
-            return Task.CompletedTask;
         }
 
         private async Task MessageDeleted(Discord.Cacheable<Discord.IMessage, ulong> cachedMessage, Discord.Cacheable<Discord.IMessageChannel, ulong> channel)
@@ -31,13 +27,13 @@ namespace DiscordBot.Modules.Monitor
             {
                 await TryRespondMessage(cachedMessage, channel.Value);
             }
-                
-            //Console.WriteLine($"{title}: {content}");
+
             return;
         }
 
         private Task MessagesBulkDeleted(IReadOnlyCollection<Discord.Cacheable<Discord.IMessage, ulong>> arg1, Discord.Cacheable<Discord.IMessageChannel, ulong> arg2)
         {
+            Console.WriteLine("MessagesBulkDeleted");
             return Task.CompletedTask;
         }
 
@@ -52,10 +48,17 @@ namespace DiscordBot.Modules.Monitor
                 return;
 
             await TryRespondMessage(cachedMessage, channel, message);
-            //Console.WriteLine($"{title}: {content}");
             return;
         }
 
+        #region Приватные
+        /// <summary>
+        /// Если соблюдены условия, попытаться ответить в текстовый канал
+        /// </summary>
+        /// <param name="cachedMessage">Сообщение из кеша</param>
+        /// <param name="channel">Канал</param>
+        /// <param name="message">Сообщение</param>
+        /// <returns></returns>
         private async Task<bool> TryRespondMessage(
             Discord.Cacheable<Discord.IMessage, ulong> cachedMessage, 
             IMessageChannel channel,
@@ -77,8 +80,10 @@ namespace DiscordBot.Modules.Monitor
             await socketGuildChannel.SendMessageAsync(embed: embedBuilder.Build());
             return true;
         }
+        #endregion
 
-        private EmbedBuilder GetMessageEmbedBuilder(IMessage cachedMessage, IMessage? message = null)
+        #region Статичные
+        public static EmbedBuilder GetMessageEmbedBuilder(IMessage cachedMessage, IMessage? message = null)
         {
             if (message != null)
                 return GetMessageUpdatedEmbedBuilder(cachedMessage, message);
@@ -86,7 +91,7 @@ namespace DiscordBot.Modules.Monitor
                 return GetMessageDeletedEmbedBuilder(cachedMessage);
         }
 
-        private EmbedBuilder GetMessageUpdatedEmbedBuilder(IMessage? cachedMessage, IMessage message)
+        public static EmbedBuilder GetMessageUpdatedEmbedBuilder(IMessage? cachedMessage, IMessage message)
         {
             if (cachedMessage == null)
             {
@@ -108,7 +113,7 @@ namespace DiscordBot.Modules.Monitor
             }
         }
 
-        private EmbedBuilder GetMessageDeletedEmbedBuilder(IMessage? cachedMessage)
+        public static EmbedBuilder GetMessageDeletedEmbedBuilder(IMessage? cachedMessage)
         {
             if (cachedMessage == null)
             {
@@ -127,5 +132,6 @@ namespace DiscordBot.Modules.Monitor
                     .WithFooter($"{cachedMessage.Id}");
             }
         }
+        #endregion
     }
 }

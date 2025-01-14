@@ -1,4 +1,4 @@
-﻿using DiscordBot.Structures;
+﻿using DiscordBot.Entities.Base;
 
 namespace DiscordBot.Entities
 {

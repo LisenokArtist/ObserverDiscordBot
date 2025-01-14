@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace DiscordBot
+﻿namespace DiscordBot
 {
     public static class Program
     {
@@ -18,6 +16,7 @@ namespace DiscordBot
             catch (Exception ex)
             {
                 Console.WriteLine(ex.ToString());
+                DiscordBot.Dispose();
             }
         }
     }

@@ -3,7 +3,7 @@ using Discord.WebSocket;
 using DiscordBot.Interfaces;
 using SQLite;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Core.DiscordNetExtensions
 {
     public class InteractionServiceExtended : InteractionService
     {
@@ -13,7 +13,7 @@ namespace DiscordBot.Services
         internal HashSet<KeyValuePair<IDiscordModule, IController>> _discordModules = new HashSet<KeyValuePair<IDiscordModule, IController>>();
 
         public InteractionServiceExtended(
-            DiscordSocketClient client, 
+            DiscordSocketClient client,
             SQLiteConnection sqlite,
             InteractionServiceConfig? config = null) : base(client.Rest, config)
         {

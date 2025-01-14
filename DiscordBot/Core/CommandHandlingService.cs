@@ -1,9 +1,10 @@
 ﻿using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordBot.Core.DiscordNetExtensions;
 using SQLite;
 using System.Reflection;
 
-namespace DiscordBot.Services
+namespace DiscordBot.Core
 {
     public class CommandHandlingService
     {
@@ -13,9 +14,9 @@ namespace DiscordBot.Services
         internal readonly SQLiteConnection _sqlite;
 
         public CommandHandlingService(
-            SQLiteConnection sqlite, 
+            SQLiteConnection sqlite,
             DiscordSocketClient client,
-            InteractionServiceExtended commands, 
+            InteractionServiceExtended commands,
             IServiceProvider services)
         {
             _sqlite = sqlite;
@@ -35,19 +36,19 @@ namespace DiscordBot.Services
             _commands.ComponentCommandExecuted += ComponentCommandExecuted;
         }
 
-        private Task ComponentCommandExecuted(ComponentCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+        private Task ComponentCommandExecuted(ComponentCommandInfo arg1, Discord.IInteractionContext arg2, IResult arg3)
         {
             return Task.CompletedTask;
             //throw new NotImplementedException();
         }
 
-        private Task ContextCommandExecuted(ContextCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+        private Task ContextCommandExecuted(ContextCommandInfo arg1, Discord.IInteractionContext arg2, IResult arg3)
         {
             return Task.CompletedTask;
             //throw new NotImplementedException();
         }
 
-        private Task SlashCommandExecuted(SlashCommandInfo arg1, Discord.IInteractionContext arg2, Discord.Interactions.IResult arg3)
+        private Task SlashCommandExecuted(SlashCommandInfo arg1, Discord.IInteractionContext arg2, IResult arg3)
         {
             return Task.CompletedTask;
             //throw new NotImplementedException();

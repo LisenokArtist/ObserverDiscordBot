@@ -1,10 +1,11 @@
 ﻿using Discord.WebSocket;
-using DiscordBot.Modules;
-using DiscordBot.Modules.Pinterest;
 using System.Text.RegularExpressions;
 
-namespace DiscordBot.Entities.Pinterest
+namespace DiscordBot.Modules.Pinterest
 {
+    /// <summary>
+    /// Модуль для автономной работы парсера ссылок на Pinterest
+    /// </summary>
     public class PinterestModule : DiscordModuleBase
     {
         internal PinterestDBController Controller { get { return (PinterestDBController)_controller; } }
@@ -38,7 +39,7 @@ namespace DiscordBot.Entities.Pinterest
             }
         }
 
-        #region Static
+        #region Статичные
         public static async Task<IEnumerable<string>> ModifyPinterestLinks(IEnumerable<string> urls)
         {
             var result = new List<string>();

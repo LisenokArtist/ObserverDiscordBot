@@ -1,5 +1,4 @@
 ﻿using DiscordBot.Entities.Pinterest;
-using DiscordBot.Structures;
 using SQLite;
 
 namespace DiscordBot.Modules.Pinterest

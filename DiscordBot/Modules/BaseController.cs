@@ -2,30 +2,21 @@
 using SQLite;
 using System.Reflection;
 
-namespace DiscordBot.Structures
+namespace DiscordBot.Modules
 {
     public abstract class BaseController<T1, T2> : BaseController<T1>
         where T1 : IDataEntity
         where T2 : IDataEntity
     {
-        internal BaseController(SQLiteConnection connection) : base(connection)
-        {
-            _connection.CreateTable<T2>();
-        }
+        internal BaseController(SQLiteConnection connection) : base(connection) => _connection.CreateTable<T2>();
 
-        internal string GetTableNameT2()
-        {
-            return GetTableName<T2>();
-        }
+        internal string GetTableNameT2() => GetTableName<T2>();
     }
 
     public abstract class BaseController<T1> : BaseController
         where T1 : IDataEntity
     {
-        internal BaseController(SQLiteConnection connection) : base(connection)
-        {
-            _connection.CreateTable<T1>();
-        }
+        internal BaseController(SQLiteConnection connection) : base(connection) => _connection.CreateTable<T1>();
 
         public int Add(object body) => _connection.Insert((T1)body);
 
@@ -67,10 +58,7 @@ namespace DiscordBot.Structures
             return count;
         }
 
-        internal string GetTableNameT1()
-        {
-            return GetTableName<T1>();
-        }
+        internal string GetTableNameT1() => GetTableName<T1>();
 
         internal string GetTableName<T>()
         {
