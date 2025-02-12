@@ -99,11 +99,22 @@ namespace DiscordBot
             IsDisposed = true;
         }
 
-        private static readonly IConfigurationSection Secrets =
-            new ConfigurationBuilder()
-            .AddUserSecrets(Assembly.GetExecutingAssembly())
-            .Build()
-            .GetSection("DiscordConfigurations");
+        private static readonly IConfigurationSection Secrets = ConfigurationBuilder();
+
+        private static IConfigurationSection ConfigurationBuilder()
+        {
+        #if DEBUG
+            return new ConfigurationBuilder()
+                .AddUserSecrets(Assembly.GetExecutingAssembly())
+                .Build()
+                .GetSection("DiscordConfigurationsDebug");
+        #else
+            return new ConfigurationBuilder()
+                .AddUserSecrets(Assembly.GetExecutingAssembly())
+                .Build()
+                .GetSection("DiscordConfigurations");
+        #endif
+        }
 
         private static string GetToken() => Secrets.GetSection("Token")?.Value ?? throw new NullReferenceException("Unable to grab token from user secrets config");
     }
