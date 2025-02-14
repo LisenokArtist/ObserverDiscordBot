@@ -68,10 +68,7 @@ namespace DiscordBot
 
             Client.Ready += async () =>
             {
-                foreach (var guild in Client.Guilds)
-                {
-                    await Commands.RegisterCommandsToGuildAsync(guild.Id, true);
-                }
+                await Commands.RegisterCommandsGloballyAsync(deleteMissing: true);
             };
 
             var token = GetToken();
