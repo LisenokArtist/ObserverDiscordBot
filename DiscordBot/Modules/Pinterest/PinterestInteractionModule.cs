@@ -5,6 +5,8 @@ using DiscordBot.Core.DiscordNetExtensions;
 using DiscordBot.Interfaces;
 using HtmlAgilityPack;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Channels;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace DiscordBot.Modules.Pinterest
 {
@@ -21,7 +23,7 @@ namespace DiscordBot.Modules.Pinterest
             _controller = (PinterestDBController)service
                 .DiscordModules
                 .SingleOrDefault(x => { return x.Value is PinterestDBController; }).Value;
-            
+
             if (_controller == null)
             {
                 var pair = CreateModules(service);
@@ -31,39 +33,49 @@ namespace DiscordBot.Modules.Pinterest
         }
 
         #region Команды
-        [RequireBotPermission(GuildPermission.SendMessages)]
         [SlashCommand(name: "pin", description: "Преобразовывает ссылку Pinterest на читаемую дискордом контент типа изображение или видео")]
         public async Task Pin(string url)
         {
+            var ephemeral = true;
+            await DeferAsync(ephemeral: ephemeral);
+
             var result = string.Empty;
-            var isEphemeral = false;
             try
             {
                 result = await GetContentFromPin(url);
+                ephemeral = false;
             }
             catch (Exception ex)
             {
-                isEphemeral = true;
                 result = ex.Message;
             }
-            
-            await RespondAsync(result, ephemeral: isEphemeral);
+            if (ephemeral)
+            {
+                await FollowupAsync(text: result, ephemeral: ephemeral);
+            }
+            else
+            {
+                await DeleteOriginalResponseAsync();
+                await Context.Channel.SendMessageAsync(text: result, ephemeral);
+            }
         }
 
         [DefaultMemberPermissions(GuildPermission.Administrator)]
-        [RequireBotPermission(GuildPermission.ManageMessages | GuildPermission.SendMessages)]
-        [SlashCommand(name: "pin-allow-modify-messages", description: "Позволяет боту редактировать ссылки на Pinterest в сообщениях автоматически")]
-        public async Task PinAllowModifyMessages(bool allow)
+        [RequireBotPermission(GuildPermission.SendMessagesInThreads | GuildPermission.SendMessages)]
+        [CommandContextType([InteractionContextType.Guild])]
+        [SlashCommand(name: "pin-autoparse", description: "Автоматически преобразует ссылки Pinterest в сообщениях")]
+        public async Task PinAutoparse(bool allow)
         {
-            await RespondAsync("Выполняю настройку...", ephemeral: true);
-
+            var ephemeral = true;
+            await DeferAsync(ephemeral: ephemeral);
+            
             var settings = _controller.GetSettings(Context.Guild.Id);
             if (settings != null)
             {
                 settings.GuildName = Context.Guild.Name;
                 settings.AllowAutoModifyMessages = allow;
                 _controller.Update(settings);
-                await ModifyOriginalResponseAsync(x => x.Content = $"Настройки модуля обновлены");
+                await FollowupAsync(text: "Настройки модуля обновлены", ephemeral: ephemeral);
             }
             else
             {
@@ -74,7 +86,7 @@ namespace DiscordBot.Modules.Pinterest
                     AllowAutoModifyMessages = allow
                 };
                 _controller.Add(settings);
-                await ModifyOriginalResponseAsync(x => x.Content += $"Новые настройки модуля сохранены");
+                await FollowupAsync(text: "Новые настройки модуля сохранены", ephemeral: ephemeral);
             }
         }
         #endregion
@@ -113,13 +125,46 @@ namespace DiscordBot.Modules.Pinterest
                     result = node.Name switch
                     {
                         "img" => node.Attributes["src"].Value,
-                        "video" => node.Attributes["src"].Value.Replace("hls", "720p").Replace("m3u8", "mp4"),
+                        //"video" => node.Attributes["src"].Value.Replace("hls", "720p").Replace("m3u8", "mp4"),
+                        "video" => await ModifyAndValidateVideoLink(client, node.Attributes["src"].Value),
                         _ => throw new NotImplementedException($"Not implemented exception of {node.Name} element"),
                     };
+                    
                 }
             }
 
             return result;
+        }
+
+        private static async Task<string> ModifyAndValidateVideoLink(HttpClient client, string url)
+        {
+            var tuples = new List<(string, string, string)>()
+            {
+                ("iht", "720p", "mp4"),
+                ("mc", "720p", "mp4"),
+            };
+
+            foreach (var t in tuples)
+            {
+                var newUrl = url.Replace("iht", t.Item1).Replace("hls", t.Item2).Replace("m3u8", t.Item3);
+                var isSuccess = await ValidateLink(client, newUrl);
+                if (isSuccess)
+                {
+                    return newUrl;
+                }
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public static async Task<bool> ValidateLink(HttpClient client, string url)
+        {
+            var response = await client.GetAsync(url);
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            return false;
         }
         #endregion
     }
