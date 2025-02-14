@@ -29,6 +29,7 @@ namespace DiscordBotTests
         [TestCase(arguments: ["https://www.google.ru/"])]
         [TestCase(arguments: ["asdd"])]
         [TestCase(arguments: ["https://ru.pinterest.com/pin/840343611753455428/"])]
+        [TestCase(arguments: ["https://ru.pinterest.com/pin/192880796535394380/"])] //битый пин, должен быть результат https://v1.pinimg.com/videos/mc/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4
         public async Task GetContentFromPinTest(string url)
         {
             var result = await PinterestInteractionModule.GetContentFromPin(url);
@@ -60,6 +61,17 @@ namespace DiscordBotTests
         {
             var result = PinterestModule.ExtractPinterestLinks(text);
             Console.WriteLine(string.Join(Environment.NewLine, result));
+        }
+
+        [TestCase(arguments: ["https://v1.pinimg.com/videos/iht/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4"])] 
+        [TestCase(arguments: ["https://v1.pinimg.com/videos/mc/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4"])]
+        public async Task ValidateLinkTest(string url)
+        {
+            using (var client = new HttpClient())
+            {
+                var result = await PinterestInteractionModule.ValidateLink(client, url);
+                Console.WriteLine(result);
+            }
         }
     }
 }
