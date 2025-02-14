@@ -33,6 +33,7 @@ namespace DiscordBot.Modules.Monitor
         #region Команды
         [DefaultMemberPermissions(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ReadMessageHistory | GuildPermission.ViewChannel)]
+        [CommandContextType([InteractionContextType.Guild])]
         [SlashCommand(name: "monitor-channel", description: "Отслеживает сообщения в канале.")]
         public async Task MonitorChannel(IGuildChannel? include = null, IGuildChannel? exclude = null)
         {
@@ -65,6 +66,7 @@ namespace DiscordBot.Modules.Monitor
 
         [DefaultMemberPermissions(GuildPermission.Administrator)]
         [RequireBotPermission(GuildPermission.ViewChannel | GuildPermission.SendMessages)]
+        [CommandContextType([InteractionContextType.Guild])]
         [SlashCommand(name: "monitor-channel-responses", description: "Выводит информацию об изменениях сообщений в отслеживаемых каналах")]
         public async Task MonitorChannelResponses(SocketTextChannel? channel)
         {
