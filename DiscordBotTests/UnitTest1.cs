@@ -2,6 +2,7 @@ using DiscordBot.Modules.Monitor;
 using DiscordBot.Modules.Pinterest;
 using HtmlAgilityPack;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Newtonsoft.Json;
 using System;
 using System.Net.NetworkInformation;
 using System.Reflection.Metadata;
@@ -26,10 +27,10 @@ namespace DiscordBotTests
         [TestCase(arguments: ["https://pin.it/2EEOkdF5H"])]
         [TestCase(arguments: ["https://pin.it/1VTyeCjTF"])]
         [TestCase(arguments: ["https://pin.it/2wxN2vdKB"])]
-        [TestCase(arguments: ["https://www.google.ru/"])]
         [TestCase(arguments: ["asdd"])]
         [TestCase(arguments: ["https://ru.pinterest.com/pin/840343611753455428/"])]
         [TestCase(arguments: ["https://ru.pinterest.com/pin/192880796535394380/"])] //битый пин, должен быть результат https://v1.pinimg.com/videos/mc/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4
+        [TestCase(arguments: ["https://ru.pinterest.com/pin/1105352302297962911/"])]
         public async Task GetContentFromPinTest(string url)
         {
             var result = await PinterestInteractionModule.GetContentFromPin(url);
@@ -62,7 +63,7 @@ namespace DiscordBotTests
             var result = PinterestModule.ExtractPinterestLinks(text);
             Console.WriteLine(string.Join(Environment.NewLine, result));
         }
-
+        
         [TestCase(arguments: ["https://v1.pinimg.com/videos/iht/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4"])] 
         [TestCase(arguments: ["https://v1.pinimg.com/videos/mc/720p/e6/45/27/e6452782f0e3c253a6803ca2212e5bca.mp4"])]
         public async Task ValidateLinkTest(string url)

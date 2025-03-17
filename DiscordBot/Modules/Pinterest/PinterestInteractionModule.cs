@@ -140,20 +140,19 @@ namespace DiscordBot.Modules.Pinterest
         {
             var tuples = new List<(string, string, string)>()
             {
-                ("iht", "720p", "mp4"),
-                ("mc", "720p", "mp4"),
+                ("iht", "720p", ".mp4"),
+                ("iht", "expMp4", "_720w.mp4"),
+                ("mc", "720p", ".mp4"),
             };
-
             foreach (var t in tuples)
             {
-                var newUrl = url.Replace("iht", t.Item1).Replace("hls", t.Item2).Replace("m3u8", t.Item3);
+                var newUrl = url.Replace("iht", t.Item1).Replace("hls", t.Item2).Replace(".m3u8", t.Item3);
                 var isSuccess = await ValidateLink(client, newUrl);
                 if (isSuccess)
                 {
                     return newUrl;
                 }
             }
-
             throw new NotImplementedException();
         }
 
